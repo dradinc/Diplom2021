@@ -1,0 +1,25 @@
+<title>Мастерские ПТК</title>
+<style>
+    .grid {
+        display: grid;
+    }
+    .grid.main-grid {
+        grid-area:auto;
+        height: 100%;
+    }
+    .grid.form-grid {
+        
+    }
+</style>
+<body>
+    <section class="grid main-grid">
+        <article>
+            <form class="grid form-grid" method="POST">
+                <article>Авторизация</article>
+                <article>{{ form.login(size=35) }}</article>
+                <article>{{ form.password(size=35) }}</article>
+                <article>{{ form.submit() }}</article>
+            </form>
+        </article>
+    </section>
+</body>
