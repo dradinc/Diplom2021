@@ -2,7 +2,7 @@
 import flask, flask_restful # Для создания "сервера"
 
 # Переменные
-server = Flask(__name__)
+server = flask.Flask(__name__)
 
 # Что-то там
 
