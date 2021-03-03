@@ -24,6 +24,15 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `workshops_ptk` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 USE `workshops_ptk`;
 
+DELIMITER $$
+--
+-- Процедуры
+--
+CREATE DEFINER=`root`@`%` PROCEDURE `authorization` (IN `login` VARCHAR(35) CHARSET utf8mb4, IN `pass` VARCHAR(35) CHARSET utf8mb4)  NO SQL
+SELECT IF ( EXISTS(SELECT * FROM users WHERE ((users.login = login) OR (users.email = login)) AND (users.password = PASSWORD(SHA(pass)))), true, false)$$
+
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -31,14 +40,15 @@ USE `workshops_ptk`;
 --
 
 CREATE TABLE `activity` (
-  `activityID` int(11) NOT NULL,
+  `activityID` int(11) NOT NULL AUTO_INCREMENT,
   `type_activity` smallint(6) NOT NULL,
   `time_interval` smallint(6) NOT NULL,
   `workshop` smallint(6) NOT NULL,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `owner` smallint(6) NOT NULL,
-  `status` smallint(2) NOT NULL
+  `status` smallint(2) NOT NULL,
+  PRIMARY KEY (`activityID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -48,10 +58,11 @@ CREATE TABLE `activity` (
 --
 
 CREATE TABLE `report` (
-  `reportID` int(11) NOT NULL,
+  `reportID` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
-  `report_file` mediumblob NOT NULL
+  `report_file` mediumblob NOT NULL,
+  PRIMARY KEY (`reportID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -61,11 +72,12 @@ CREATE TABLE `report` (
 --
 
 CREATE TABLE `report_template` (
-  `reporttemplateID` smallint(6) NOT NULL,
+  `reporttemplateID` smallint(6) NOT NULL AUTO_INCREMENT,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `template_configeration` mediumblob NOT NULL,
-  `template_file` mediumblob NOT NULL
+  `template_file` mediumblob NOT NULL,
+  PRIMARY KEY (`reporttemplateID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -75,10 +87,11 @@ CREATE TABLE `report_template` (
 --
 
 CREATE TABLE `time_intervals` (
-  `timeintervalID` smallint(6) NOT NULL,
+  `timeintervalID` smallint(6) NOT NULL AUTO_INCREMENT,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
   `time_start` time NOT NULL,
-  `time_end` time NOT NULL
+  `time_end` time NOT NULL,
+  PRIMARY KEY (`timeintervalID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -88,9 +101,10 @@ CREATE TABLE `time_intervals` (
 --
 
 CREATE TABLE `type_activity` (
-  `typeactivityID` smallint(3) NOT NULL,
+  `typeactivityID` smallint(3) NOT NULL AUTO_INCREMENT,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `description` text COLLATE utf8_unicode_ci
+  `description` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`typeactivityID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -99,16 +113,17 @@ CREATE TABLE `type_activity` (
 -- Структура таблицы `users`
 --
 
-CREATE TABLE `users` (
-  `userID` smallint(6) NOT NULL,
-  `login` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varbinary(41) NOT NULL,
-  `rights` smallint(3) NOT NULL,
-  `name` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `lastname` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `middlename` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `email` varchar(35) COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE TABLE `workshops_ptk`.`users` (
+  `userID` SMALLINT NOT NULL AUTO_INCREMENT ,
+  `login` VARCHAR(35) NOT NULL ,
+  `password` VARBINARY(41) NOT NULL ,
+  `email` VARCHAR(35) NULL ,
+  `rights` SMALLINT(3) NOT NULL ,
+  `name` VARCHAR(35) NOT NULL ,
+  `lastname` VARCHAR(35) NOT NULL ,
+  `middlename` VARCHAR(35) NOT NULL ,
+  PRIMARY KEY (`userID`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -117,67 +132,24 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `workshops` (
-  `workshopsID` smallint(6) NOT NULL,
+  `workshopsID` smallint(6) NOT NULL AUTO_INCREMENT,
   `title` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `owner` smallint(6) DEFAULT NULL,
-  `kabinet` varchar(4) COLLATE utf8_unicode_ci NOT NULL
+  `kabinet` varchar(4) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`workshopsID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Индексы сохранённых таблиц
---
-
 --
 -- Индексы таблицы `activity`
 --
 ALTER TABLE `activity`
-  ADD PRIMARY KEY (`activityID`),
   ADD KEY `owner` (`owner`),
   ADD KEY `workshop` (`workshop`),
   ADD KEY `time_interval` (`time_interval`),
   ADD KEY `type_activity` (`type_activity`);
 
---
--- Индексы таблицы `report`
---
-ALTER TABLE `report`
-  ADD PRIMARY KEY (`reportID`);
-
---
--- Индексы таблицы `report_template`
---
-ALTER TABLE `report_template`
-  ADD PRIMARY KEY (`reporttemplateID`);
-
---
--- Индексы таблицы `time_intervals`
---
-ALTER TABLE `time_intervals`
-  ADD PRIMARY KEY (`timeintervalID`);
-
---
--- Индексы таблицы `type_activity`
---
-ALTER TABLE `type_activity`
-  ADD PRIMARY KEY (`typeactivityID`);
-
---
--- Индексы таблицы `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`userID`);
-
---
--- Индексы таблицы `workshops`
---
 ALTER TABLE `workshops`
-  ADD PRIMARY KEY (`workshopsID`),
   ADD KEY `owner` (`owner`);
-
---
--- Ограничения внешнего ключа сохраненных таблиц
---
 
 --
 -- Ограничения внешнего ключа таблицы `activity`
